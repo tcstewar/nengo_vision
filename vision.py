@@ -4,6 +4,7 @@ K = 3        # number of gabors per sample point
 width = 75   # width (and height) of the patch
 SV = 300    # number of singular values to keep
 input_gain = 1 # scaling factor to apply to input (to speed up integration)
+sparse_threshold = None   # for making encoder matrix sparse
 
 import platform
 if platform.system() == 'Windows':
@@ -34,9 +35,17 @@ for i in range(K):
     else:
         samples += gabor.make_gabors(S, width)
 
+if sparse_threshold is not None:
+    print now(), 'converting to sparse'
+    m = np.abs(encoders.T)
+    threshold = np.max(m) * sparse_threshold
+
+    enc = scipy.sparse.csr_matrix(np.where(m < threshold, 0, encoders.T))
+else:
+    enc = encoders.T
 
 print now(), 'computing SVD'
-U, S, V = scipy.sparse.linalg.svds(encoders.T, k=SV)
+U, S, V = scipy.sparse.linalg.svds(enc, k=SV)
 basis = U
 print 'SV ratio:', np.min(S) / np.max(S)
 
