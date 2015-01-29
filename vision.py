@@ -5,6 +5,12 @@ width = 75   # width (and height) of the patch
 SV = 300    # number of singular values to keep
 input_gain = 1 # scaling factor to apply to input (to speed up integration)
 
+import platform
+if platform.system() == 'Windows':
+    use_multi = False
+else:
+    use_multi = True
+
 import gabor
 import numpy as np
 import scipy.sparse.linalg
@@ -15,17 +21,18 @@ start = time.time()
 def now():
     return '%7.3f' % (time.time() - start)
 print now(), 'generating encoders'
-encoders = gabor.make_gabors_multi(N, width)
-
-#gabor.plot_gabors(encoders)
-#import pylab
-#pylab.show()
-#1/0
+if use_multi:
+    encoders = gabor.make_gabors_multi(N, width)
+else:
+    encoders = gabor.make_gabors(N, width)
 
 print now(), 'generating samples'
 samples = np.zeros((S, width * width))
 for i in range(K):
-    samples += gabor.make_gabors_multi(S, width)
+    if use_multi:
+        samples += gabor.make_gabors_multi(S, width)
+    else:
+        samples += gabor.make_gabors(S, width)
 
 
 print now(), 'computing SVD'
@@ -43,7 +50,7 @@ def uncompress(compressed):
 
 print now(), 'defining model'
 import nengo
-neuron_type = nengo.LIFRate()   # default is nengo.LIF()
+neuron_type = nengo.LIF()   # default is nengo.LIF()
 
 stim_image = gabor.make_gabors(K, width)
 stim_image = np.sum(stim_image, axis=0)
