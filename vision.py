@@ -1,8 +1,8 @@
-N = 10000     # number of neurons
+N = 20000     # number of neurons
 S = 5000     # number of sample points (eval_points)
 K = 3        # number of gabors per sample point
 width = 75   # width (and height) of the patch
-SV = 300    # number of singular values to keep
+SV = 600    # number of singular values to keep
 input_gain = 1 # scaling factor to apply to input (to speed up integration)
 sparse_threshold = None   # for making encoder matrix sparse
 
